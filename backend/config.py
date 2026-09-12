@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     git_committer_email: str = "bot@flux.dev"
     git_clone_timeout: int = 120
     gemini_api_key: str = ""
-    gemini_model: str = ""
+    gemini_model: str = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
     max_diff_lines_for_pr: int = 150
     max_files_touched_for_pr: int = 4
     opencode_cli_cmd: str = "opencode"
@@ -58,10 +58,10 @@ class Settings(BaseSettings):
     def effective_api_key(self) -> str:
         return self.gemini_api_key or os.getenv("GEMINI_API_KEY", "")
 
-    # Resolves the effective Gemini model name strictly from settings or environment.
+    # Resolves the effective Gemini model name with fallback.
     @property
     def effective_model(self) -> str:
-        return self.gemini_model or os.getenv("GEMINI_MODEL", "")
+        return self.gemini_model or os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
     model_config = SettingsConfigDict(
         env_file=(str(_ROOT_ENV), str(_BACKEND_ENV), ".env", "../.env"),
