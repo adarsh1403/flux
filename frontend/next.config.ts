@@ -1,8 +1,8 @@
-// Next.js configuration for production standalone builds.
+// Next.js configuration supporting Vercel and containerized environments.
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  output: process.env.DOCKER_BUILD === "1" ? "standalone" : undefined,
 };
 
 export default nextConfig;
