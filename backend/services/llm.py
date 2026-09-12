@@ -96,9 +96,11 @@ async def generate_repository_understanding(repo_data: Dict[str, Any], digest: s
     api_key = settings.effective_api_key
 
     if not api_key:
+        print(f"[Gemini] Warning: GEMINI_API_KEY is not configured. Using grounded fallback for {repo_id}.", flush=True)
         return generate_grounded_fallback(repo_data, digest, repo_id, now_iso)
 
     model_name = settings.effective_model
+    print(f"[Gemini] Requesting AI understanding for {repo_id} using model '{model_name}' (key length {len(api_key)})...", flush=True)
 
     try:
         from google import genai
@@ -128,6 +130,7 @@ async def generate_repository_understanding(repo_data: Dict[str, Any], digest: s
 
         data_dict = json.loads(raw_text)
         parsed = LLMUnderstandingSchema.model_validate(data_dict)
+        print(f"[Gemini] Successfully generated structured understanding for {repo_id} with model '{model_name}'.", flush=True)
 
         return RepoUnderstanding(
             repo_id=repo_id,
@@ -140,5 +143,6 @@ async def generate_repository_understanding(repo_data: Dict[str, Any], digest: s
             digest=digest,
             created_at=now_iso,
         )
-    except Exception:
+    except Exception as exc:
+        print(f"[Gemini] Generation failed for {repo_id} with model '{model_name}': {type(exc).__name__}: {exc}", flush=True)
         return generate_grounded_fallback(repo_data, digest, repo_id, now_iso)

@@ -79,12 +79,14 @@ async def generate_issue_explanation(
     api_key = settings.effective_api_key
 
     if not api_key:
+        print(f"[Gemini] Warning: GEMINI_API_KEY missing for issue #{issue_number} in {repo_id}.", flush=True)
         return generate_grounded_issue_fallback(issue_data, graph_contexts, repo_id, issue_number, now_iso)
 
     model_name = settings.effective_model
     graph_digest = format_issue_graph_digest(graph_contexts)
     title = issue_data.get("title", "")
     body = issue_data.get("body", "")
+    print(f"[Gemini] Requesting issue explanation for #{issue_number} in {repo_id} with model '{model_name}'...", flush=True)
 
     try:
         from google import genai
@@ -115,6 +117,7 @@ async def generate_issue_explanation(
             raw_text = raw_text.split("```json")[-1].split("```")[0].strip()
 
         parsed = LLMIssueExplanationSchema.model_validate(json.loads(raw_text))
+        print(f"[Gemini] Successfully explained issue #{issue_number} in {repo_id} with {model_name}.", flush=True)
 
         return IssueExplanation(
             issue_id=f"{repo_id}#{issue_number}",
@@ -129,5 +132,6 @@ async def generate_issue_explanation(
             is_fallback=False,
             created_at=now_iso,
         )
-    except Exception:
+    except Exception as exc:
+        print(f"[Gemini] Issue explanation failed for #{issue_number} in {repo_id}: {type(exc).__name__}: {exc}", flush=True)
         return generate_grounded_issue_fallback(issue_data, graph_contexts, repo_id, issue_number, now_iso)

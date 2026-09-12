@@ -58,12 +58,14 @@ class Settings(BaseSettings):
     # Resolves the Gemini API key from settings or environment.
     @property
     def effective_api_key(self) -> str:
-        return self.gemini_api_key or os.getenv("GEMINI_API_KEY", "")
+        key = self.gemini_api_key or os.getenv("GEMINI_API_KEY", "")
+        return key.strip().strip("\"'")
 
     # Resolves the effective Gemini model name with fallback.
     @property
     def effective_model(self) -> str:
-        return self.gemini_model or os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+        model = self.gemini_model or os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+        return model.strip().strip("\"'")
 
     model_config = SettingsConfigDict(
         env_file=(str(_ROOT_ENV), str(_BACKEND_ENV), ".env", "../.env"),
