@@ -3,7 +3,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Any, List
+from typing import Any, List, Union
 from dotenv import load_dotenv
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -32,19 +32,21 @@ class Settings(BaseSettings):
     demo_mode: bool = False
     workspaces_dir: Path = Path(os.getenv("WORKSPACES_DIR", str(Path(__file__).resolve().parent.parent / "workspaces")))
     database_path: Path = Path(os.getenv("DATABASE_PATH", str(Path(__file__).resolve().parent / "flux.db")))
-    cors_origins: List[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
+    cors_origins: Union[List[str], str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
     http_timeout: float = 10.0
     user_agent: str = "flux-app/1.0"
     max_preview_lines: int = 600
     max_preview_bytes: int = 64 * 1024
     max_read_chars: int = 100_000
 
-    # Normalizes CORS origins from comma-separated string or JSON array.
-    @field_validator("cors_origins", mode="before")
+    # Normalizes CORS origins from comma-separated string, wildcard, or JSON array.
+    @field_validator("cors_origins", mode="after")
     @classmethod
-    def parse_cors_origins(cls, v: Any) -> Any:
+    def parse_cors_origins(cls, v: Any) -> List[str]:
         if isinstance(v, str):
             v = v.strip()
+            if v == "*":
+                return ["*"]
             if v.startswith("[") and v.endswith("]"):
                 try:
                     return json.loads(v)
