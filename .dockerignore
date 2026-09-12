@@ -1,0 +1,14 @@
+# Docker build context exclusion rules.
+.git
+.gitignore
+.env
+.env.local
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+node_modules
+.next
+workspaces
+backend/flux.db
+backend/workspaces

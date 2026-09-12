@@ -1,0 +1,39 @@
+# Docker Compose configuration for multi-service flux application.
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: flux-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.5-flash}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+      - WORKSPACES_DIR=/app/workspaces
+      - DATABASE_PATH=/app/data/flux.db
+    volumes:
+      - flux_workspaces:/app/workspaces
+      - flux_data:/app/data
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL:-http://localhost:8000}
+    container_name: flux-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - backend
+
+volumes:
+  flux_workspaces:
+  flux_data:

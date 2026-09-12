@@ -15,8 +15,8 @@ load_dotenv(dotenv_path=_BACKEND_ENV)
 
 
 class Settings(BaseSettings):
-    backend_host: str = "127.0.0.1"
-    backend_port: int = 8000
+    backend_host: str = os.getenv("BACKEND_HOST", "0.0.0.0" if os.getenv("PORT") else "127.0.0.1")
+    backend_port: int = int(os.getenv("PORT", os.getenv("BACKEND_PORT", "8000")))
     github_token: str = ""
     github_api_url: str = "https://api.github.com"
     git_committer_name: str = "flux-bot"
@@ -30,8 +30,8 @@ class Settings(BaseSettings):
     opencode_model: str = ""
     opencode_timeout: int = 120
     demo_mode: bool = False
-    workspaces_dir: Path = Path(__file__).resolve().parent.parent / "workspaces"
-    database_path: Path = Path(__file__).resolve().parent / "flux.db"
+    workspaces_dir: Path = Path(os.getenv("WORKSPACES_DIR", str(Path(__file__).resolve().parent.parent / "workspaces")))
+    database_path: Path = Path(os.getenv("DATABASE_PATH", str(Path(__file__).resolve().parent / "flux.db")))
     cors_origins: List[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
     http_timeout: float = 10.0
     user_agent: str = "flux-app/1.0"
