@@ -1,3 +1,4 @@
+/* Global stylesheet establishing Akaru warm editorial design system for FLUX. */
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
@@ -10,7 +11,7 @@
     --bg-card: #fffefa;
     --color-primary: #df7d4c;
     --color-primary-hover: #c96839;
-    --color-surface-gray: #77756f;
+    --color-surface-gray: #6b6963;
     --ink: #171817;
     --border-subtle: rgba(23, 24, 23, 0.14);
     --border-bright: #171817;
@@ -22,6 +23,16 @@
     color: var(--ink);
     font-family: var(--font-display);
     overflow-x: hidden;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: rgba(223, 125, 76, 0.28);
+    color: var(--ink);
   }
 
   /* Custom Gallery Scrollbars */
@@ -92,7 +103,7 @@
   background-color: var(--color-primary);
   color: #fffdf8;
   font-weight: 700;
-  border-radius: 4px;
+  border-radius: 10px;
   transition: all 250ms cubic-bezier(0.455, 0.03, 0.515, 0.955);
   box-shadow: 0 4px 16px rgba(228, 147, 102, 0.25);
 }
@@ -107,31 +118,43 @@
   transform: translateY(0px) scale(0.98);
 }
 
+.btn-terracotta:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
 .btn-white {
   background-color: #fffdf8;
   color: var(--ink);
   font-weight: 700;
-  border-radius: 4px;
+  border-radius: 10px;
   transition: all 250ms cubic-bezier(0.455, 0.03, 0.515, 0.955);
-  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.15);
+  box-shadow: 0 2px 10px rgba(23, 24, 23, 0.06);
+  border: 1px solid rgba(23, 24, 23, 0.12);
 }
 
 .btn-white:hover {
-  background-color: #f2f2f2;
+  background-color: #f7f4ec;
+  border-color: var(--color-primary);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 14px rgba(223, 125, 76, 0.12);
 }
 
 .btn-white:active {
   transform: translateY(0px) scale(0.98);
 }
 
+.btn-white:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 .btn-outline-white {
   background-color: transparent;
-  border: 1px solid rgba(23, 24, 23, 0.45);
+  border: 1px solid rgba(23, 24, 23, 0.25);
   color: var(--ink);
   font-weight: 600;
-  border-radius: 4px;
+  border-radius: 10px;
   transition: all 250ms cubic-bezier(0.455, 0.03, 0.515, 0.955);
 }
 
@@ -141,19 +164,35 @@
   transform: translateY(-1px);
 }
 
+.btn-outline-white:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 .btn-outline-terracotta {
   background-color: transparent;
-  border: 1.5px solid #e49366;
-  color: #e49366;
+  border: 1.5px solid var(--color-primary);
+  color: var(--color-primary);
   font-weight: 600;
-  border-radius: 4px;
+  border-radius: 10px;
   transition: all 250ms cubic-bezier(0.455, 0.03, 0.515, 0.955);
 }
 
 .btn-outline-terracotta:hover {
-  background-color: #e49366;
-  color: #0e0e0e;
+  background-color: var(--color-primary);
+  color: #fffdf8;
   transform: translateY(-1px);
+}
+
+.btn-outline-terracotta:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.alert-terracotta-error {
+  background-color: rgba(223, 125, 76, 0.08);
+  border: 1px solid rgba(223, 125, 76, 0.35);
+  color: #9c3f19;
 }
 
 .font-code {
@@ -184,11 +223,11 @@
   width: 166px;
   height: 42px;
   border-radius: 999px;
-  background: rgba(255, 254, 250, 0.42);
+  background: #ccbba5;
   filter: blur(1.3px);
-  opacity: 0.68;
+  opacity: 0.46;
   --cloud-scale: 1;
-  box-shadow: 0 10px 18px rgba(194, 170, 143, 0.08);
+  box-shadow: 0 10px 22px rgba(150, 126, 100, 0.14);
   will-change: transform;
 }
 
@@ -226,7 +265,7 @@
 .flux-cloud-two {
   top: 37%;
   left: 62%;
-  opacity: 0.47;
+  opacity: 0.42;
   --cloud-scale: 0.62;
   transform: scale(var(--cloud-scale));
   animation: flux-cloud-drift-two 56s -30s linear infinite;
@@ -235,7 +274,7 @@
 .flux-cloud-three {
   top: 61%;
   left: 28%;
-  opacity: 0.4;
+  opacity: 0.38;
   --cloud-scale: 1.04;
   transform: scale(var(--cloud-scale));
   animation: flux-cloud-drift-one 64s -45s linear infinite;
@@ -244,7 +283,7 @@
 .flux-cloud-four {
   top: 76%;
   left: 79%;
-  opacity: 0.34;
+  opacity: 0.32;
   --cloud-scale: 0.74;
   transform: scale(var(--cloud-scale));
   animation: flux-cloud-drift-two 72s -10s linear infinite;
@@ -253,7 +292,7 @@
 .flux-cloud-five {
   top: 48%;
   left: 4%;
-  opacity: 0.32;
+  opacity: 0.30;
   --cloud-scale: 0.5;
   transform: scale(var(--cloud-scale));
   animation: flux-cloud-drift-one 58s -38s linear infinite;
@@ -262,7 +301,7 @@
 .flux-cloud-six {
   top: 29%;
   left: 36%;
-  opacity: 0.38;
+  opacity: 0.36;
   --cloud-scale: 0.7;
   transform: scale(var(--cloud-scale));
   animation: flux-cloud-drift-two 62s -24s linear infinite;
@@ -271,7 +310,7 @@
 .flux-cloud-seven {
   top: 69%;
   left: 56%;
-  opacity: 0.3;
+  opacity: 0.28;
   --cloud-scale: 0.88;
   transform: scale(var(--cloud-scale));
   animation: flux-cloud-drift-one 70s -52s linear infinite;
@@ -381,47 +420,47 @@
   color: #fffdf8 !important;
 }
 
-/* The graph is a focused instrument inside the light workspace. Keep its dark
-   control rail legible while the canvas stays bright enough to inspect. */
+/* Graph container shell and harmonious gallery toolbar. */
 .graph-shell {
-  border-color: rgba(23, 24, 23, 0.22) !important;
+  border-color: rgba(23, 24, 23, 0.14) !important;
   background: #fffefa !important;
 }
 
 .graph-toolbar {
-  background: #171817 !important;
-  color: #fffefa !important;
-  border-color: rgba(255, 254, 250, 0.12) !important;
+  background: rgba(255, 254, 250, 0.96) !important;
+  color: var(--ink) !important;
+  border-color: rgba(23, 24, 23, 0.1) !important;
   min-height: 76px;
+  backdrop-filter: blur(12px);
 }
 
 .graph-toolbar .text-white,
 .graph-toolbar [class*="text-white"] {
-  color: #fffefa !important;
+  color: var(--ink) !important;
 }
 
 .graph-toolbar .text-white\/20 {
-  color: rgba(255, 254, 250, 0.3) !important;
+  color: rgba(23, 24, 23, 0.2) !important;
 }
 
 .graph-toolbar input {
-  color: #fffefa !important;
+  color: var(--ink) !important;
   caret-color: var(--color-primary);
 }
 
 .graph-toolbar input::placeholder {
-  color: rgba(255, 254, 250, 0.5) !important;
+  color: rgba(23, 24, 23, 0.45) !important;
 }
 
 .graph-toolbar select {
   background: #fffefa !important;
-  color: #171817 !important;
-  border-color: rgba(255, 254, 250, 0.24) !important;
+  color: var(--ink) !important;
+  border-color: rgba(23, 24, 23, 0.14) !important;
 }
 
 .graph-toolbar select option {
   background: #fffefa;
-  color: #171817;
+  color: var(--ink);
 }
 
 .graph-toolbar button {
@@ -438,11 +477,49 @@
 
 .graph-toolbar [class*="bg-white"] {
   background: #fffefa !important;
-  color: #171817 !important;
+  color: var(--ink) !important;
+  border: 1px solid rgba(23, 24, 23, 0.12) !important;
 }
 
 .graph-toolbar [class*="bg-white"] [class*="text-[#0e0e0e]"] {
-  color: #171817 !important;
+  color: var(--ink) !important;
+}
+
+.node-inspector-drawer {
+  background: rgba(255, 254, 250, 0.98) !important;
+  color: var(--ink) !important;
+  border-color: rgba(23, 24, 23, 0.14) !important;
+}
+
+.node-inspector-drawer [class*="text-white"] {
+  color: var(--ink) !important;
+}
+
+.node-inspector-drawer [class*="bg-[#0e0e0e]"],
+.node-inspector-drawer [class*="bg-[#141414]"],
+.node-inspector-drawer [class*="bg-[#171717]"] {
+  background-color: rgba(247, 244, 236, 0.75) !important;
+}
+
+.node-inspector-drawer [class*="bg-[#1a1a1a]"] {
+  background-color: #fffefa !important;
+}
+
+.agent-handoff-modal {
+  background: #fffefa !important;
+  color: var(--ink) !important;
+  border-color: rgba(23, 24, 23, 0.14) !important;
+}
+
+.agent-handoff-modal [class*="text-white"] {
+  color: var(--ink) !important;
+}
+
+.agent-handoff-modal [class*="bg-[#0e0e0e]"],
+.agent-handoff-modal [class*="bg-[#121212]"],
+.agent-handoff-modal [class*="bg-[#141414]"],
+.agent-handoff-modal [class*="bg-[#171717]"] {
+  background-color: rgba(247, 244, 236, 0.7) !important;
 }
 
 .graph-viewport {

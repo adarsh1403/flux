@@ -1,14 +1,6 @@
 "use client";
 
-/**
- * ObsidianGraphCanvas.tsx
- * Akaru Prestige Edition: AST Dependency Network Explorer.
- * Features:
- * - Deterministic, static node layout (no uncontrolled drift).
- * - Continuous high-frequency network micro-animations (warm terracotta pulses, radar ripples, laser flow arrows).
- * - Akaru color schema: Warm Terracotta (#e49366), gallery near-black (#0e0e0e), crisp white (#ffffff).
- * - Interactive hover pop-up card and deep node inspection.
- */
+// Interactive AST dependency network explorer canvas with warm gallery styling.
 
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { GraphResponse, GraphNode, GraphEdge } from "../lib/api";
@@ -58,17 +50,18 @@ interface SimEdge {
   pulsePhase: number;
 }
 
-// Akaru-Harmonized Palette (Warm Terracotta, Gold, Sky Azure, Pure White, Mint - Zero Purple)
+// Akaru-harmonized cluster palette with high contrast on warm canvas.
 const AKARU_CLUSTERS = [
-  { color: "#e49366", name: "Terracotta Primary" },
-  { color: "#ffffff", name: "Pure White" },
-  { color: "#f59e0b", name: "Warm Gold" },
-  { color: "#38bdf8", name: "Sky Azure" },
-  { color: "#10b981", name: "Mint Emerald" },
-  { color: "#fb7185", name: "Coral Rose" },
-  { color: "#9e9e9e", name: "Neutral Gray" },
+  { color: "#df7d4c", name: "Terracotta Primary" },
+  { color: "#2a2c2b", name: "Slate Charcoal" },
+  { color: "#d97706", name: "Warm Amber" },
+  { color: "#0284c7", name: "Sky Azure" },
+  { color: "#059669", name: "Mint Emerald" },
+  { color: "#e11d48", name: "Coral Rose" },
+  { color: "#6b7280", name: "Neutral Slate" },
 ];
 
+// Renders interactive canvas dependency network with energy pulses and inspector drawer.
 export default function ObsidianGraphCanvas({
   owner,
   repo,
@@ -102,23 +95,23 @@ export default function ObsidianGraphCanvas({
   const animFrameIdRef = useRef<number | null>(null);
   const tickCounterRef = useRef(0);
 
-  // Color helper
+  // Resolves color token for graph node by community cluster or programming language.
   const getNodeColor = useCallback((node: SimNode): string => {
     if (node.cluster !== undefined && node.cluster >= 0) {
       return AKARU_CLUSTERS[node.cluster % AKARU_CLUSTERS.length].color;
     }
     switch (node.language.toLowerCase()) {
       case "python":
-        return "#e49366";
+        return "#df7d4c";
       case "javascript":
       case "typescript":
-        return "#ffffff";
+        return "#2a2c2b";
       case "go":
-        return "#38bdf8";
+        return "#0284c7";
       case "rust":
-        return "#f59e0b";
+        return "#d97706";
       default:
-        return "#9e9e9e";
+        return "#6b7280";
     }
   }, []);
 
@@ -214,7 +207,7 @@ export default function ObsidianGraphCanvas({
     setHoveredNode(null);
   }, [graph]);
 
-  // Center on node helper
+  // Centers viewport on a specific node with smooth animation and zoom scale.
   const centerOnNode = useCallback((nodeId: string) => {
     const target = nodesRef.current.find((n) => n.id === nodeId);
     const canvas = canvasRef.current;
@@ -269,6 +262,7 @@ export default function ObsidianGraphCanvas({
       .slice(0, 8);
   }, [graph.nodes, searchQuery]);
 
+  // Adjusts pan and zoom scale to fit entire dependency network within canvas bounds.
   const handleZoomToFit = () => {
     const nodes = nodesRef.current;
     const canvas = canvasRef.current;
@@ -404,7 +398,7 @@ export default function ObsidianGraphCanvas({
 
         // 3. Directional Arrowhead
         if (dist > tgt.radius + 15) {
-          const offsetDist = dist - tgt.radius - 3;
+          const offsetDist = dist - tgt.radius - 2.5 / zoom;
           const arrowX = src.x + (dx / dist) * offsetDist;
           const arrowY = src.y + (dy / dist) * offsetDist;
           const angle = Math.atan2(dy, dx);
@@ -424,7 +418,7 @@ export default function ObsidianGraphCanvas({
         }
       }
 
-      // 4. Draw compact module tiles with a small live core and a readable label.
+      // 4. Draw circular nodes with high-contrast cluster fills and clean centered labels underneath.
       for (const node of nodes) {
         const clusterMatch =
           selectedClusterFilter === "all" || node.cluster === selectedClusterFilter;
@@ -442,56 +436,121 @@ export default function ObsidianGraphCanvas({
 
         ctx.save();
 
-        // Animated radar beacon around hub nodes
+        // Animated radar beacon around hub nodes or focused node
         if (node.in_degree >= 2 || isFocused) {
           const ripplePhase = (tTime * 0.7 + (node.cluster || 0)) % 1;
-          const rippleRadius = node.radius + ripplePhase * (isFocused ? 18 : 12);
-          const rippleOpacity = (1 - ripplePhase) * (isFocused ? 0.7 : 0.35);
+          const rippleRadius = node.radius + ripplePhase * (isFocused ? 20 : 13);
+          const rippleOpacity = (1 - ripplePhase) * (isFocused ? 0.75 : 0.35);
 
           ctx.beginPath();
           ctx.arc(node.x, node.y, rippleRadius, 0, 2 * Math.PI);
           ctx.strokeStyle = isFocused
             ? `rgba(223, 125, 76, ${rippleOpacity})`
-            : `rgba(23, 24, 23, ${rippleOpacity * 0.65})`;
+            : `rgba(23, 24, 23, ${rippleOpacity * 0.55})`;
           ctx.lineWidth = 1.2 / zoom;
           ctx.stroke();
         }
 
-        // Outer aura glow
+        // Outer aura glow on focused or hovered node
         if (isFocused || isHovered) {
+          const auraRadius = node.radius + (isFocused ? 8 : 6) / zoom;
           ctx.beginPath();
-          ctx.arc(node.x, node.y, node.radius + 9, 0, 2 * Math.PI);
-          ctx.fillStyle = "rgba(223, 125, 76, 0.16)";
+          ctx.arc(node.x, node.y, auraRadius, 0, 2 * Math.PI);
+          ctx.fillStyle = isFocused ? "rgba(223, 125, 76, 0.22)" : "rgba(223, 125, 76, 0.14)";
           ctx.fill();
         }
 
-        // Soft rounded-square module tile, rotated slightly to separate nodes from points.
-        const tileSize = node.radius * 1.7;
-        ctx.save();
-        ctx.translate(node.x, node.y);
-        ctx.rotate(Math.PI / 4);
+        // Elevation drop shadow beneath the circle
         ctx.beginPath();
-        ctx.roundRect(-tileSize / 2, -tileSize / 2, tileSize, tileSize, 4 / zoom);
-        ctx.fillStyle = isConnected ? "#fffefa" : "rgba(255, 254, 250, 0.6)";
+        ctx.arc(node.x, node.y + 1.8 / zoom, node.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = isConnected ? "rgba(23, 24, 23, 0.12)" : "rgba(23, 24, 23, 0.04)";
         ctx.fill();
-        ctx.strokeStyle = isFocused ? "#171817" : isConnected ? nodeColor : "rgba(23, 24, 23, 0.22)";
-        ctx.lineWidth = (isFocused ? 2.4 : isHovered ? 2 : 1.2) / zoom;
+
+        // Solid porcelain base to occlude any background connection wires
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = "#fffefa";
+        ctx.fill();
+
+        // Primary solid cluster-colored circle body
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = isConnected ? nodeColor : "rgba(107, 114, 128, 0.22)";
+        ctx.fill();
+
+        // Crisp perimeter border
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.radius, 0, 2 * Math.PI);
+        if (isFocused) {
+          ctx.strokeStyle = "#171817";
+          ctx.lineWidth = 2.4 / zoom;
+        } else if (isHovered) {
+          ctx.strokeStyle = "#fffefa";
+          ctx.lineWidth = 2.2 / zoom;
+        } else if (isConnected) {
+          ctx.strokeStyle = "#fffefa";
+          ctx.lineWidth = 1.6 / zoom;
+        } else {
+          ctx.strokeStyle = "rgba(255, 254, 250, 0.6)";
+          ctx.lineWidth = 1 / zoom;
+        }
         ctx.stroke();
-        ctx.restore();
 
-        // Live center marker
-        ctx.beginPath();
-        ctx.arc(node.x, node.y, Math.max(node.radius * 0.28, 2.5), 0, 2 * Math.PI);
-        ctx.fillStyle = isConnected ? nodeColor : "rgba(23, 24, 23, 0.26)";
-        ctx.fill();
+        // Additional accent reticle ring for focused node
+        if (isFocused) {
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, node.radius + 3.5 / zoom, 0, 2 * Math.PI);
+          ctx.strokeStyle = "#df7d4c";
+          ctx.lineWidth = 1.4 / zoom;
+          ctx.stroke();
+        }
 
-        // Node Label
-        const showLabel = isFocused || isHovered || isConnected || zoom >= 0.95 || node.in_degree > 1;
+        // Clean module label positioned neatly at the bottom of the circle
+        const showLabel =
+          isFocused || isHovered || isConnected || zoom >= 0.85 || node.in_degree > 0;
         if (showLabel) {
-          ctx.font = `600 ${Math.max(10 / zoom, 9)}px var(--font-display, sans-serif)`;
+          const fontSize = Math.max(10.5 / zoom, 9);
+          ctx.font = `600 ${fontSize}px "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
           ctx.textAlign = "center";
-          ctx.fillStyle = isFocused || isHovered ? "#171817" : isConnected ? "#4e4d49" : "rgba(78, 77, 73, 0.38)";
-          ctx.fillText(node.label, node.x, node.y + node.radius + 13 / zoom);
+          ctx.textBaseline = "middle";
+
+          const textMetrics = ctx.measureText(node.label);
+          const textWidth = textMetrics.width;
+          const pillPaddingX = Math.max(5.5 / zoom, 4.5);
+          const pillHeight = Math.max(fontSize + 6 / zoom, 15 / zoom);
+          const pillY = node.y + node.radius + 5 / zoom;
+          const pillWidth = textWidth + pillPaddingX * 2;
+          const pillX = node.x - pillWidth / 2;
+          const pillRadius = 4 / zoom;
+
+          // Translucent pill backdrop to ensure label text contrast over crossing edges
+          ctx.beginPath();
+          ctx.roundRect(pillX, pillY, pillWidth, pillHeight, pillRadius);
+          if (isFocused || isHovered) {
+            ctx.fillStyle = "rgba(255, 254, 250, 0.98)";
+            ctx.fill();
+            ctx.strokeStyle = isFocused ? "#df7d4c" : "rgba(23, 24, 23, 0.28)";
+            ctx.lineWidth = (isFocused ? 1.4 : 1) / zoom;
+            ctx.stroke();
+          } else if (isConnected) {
+            ctx.fillStyle = "rgba(255, 254, 250, 0.88)";
+            ctx.fill();
+            ctx.strokeStyle = "rgba(23, 24, 23, 0.1)";
+            ctx.lineWidth = 0.85 / zoom;
+            ctx.stroke();
+          } else {
+            ctx.fillStyle = "rgba(255, 254, 250, 0.4)";
+            ctx.fill();
+          }
+
+          // Label typography
+          ctx.fillStyle =
+            isFocused || isHovered
+              ? "#171817"
+              : isConnected
+              ? "#2a2c2b"
+              : "rgba(42, 44, 43, 0.35)";
+          ctx.fillText(node.label, node.x, pillY + pillHeight / 2);
         }
 
         ctx.restore();
@@ -540,6 +599,7 @@ export default function ObsidianGraphCanvas({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Translates client screen pixel coordinates to virtual graph canvas coordinates.
   const screenToCanvas = (screenX: number, screenY: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
@@ -549,6 +609,7 @@ export default function ObsidianGraphCanvas({
     return { x, y };
   };
 
+  // Identifies nearest graph node matching canvas coordinate within hit radius.
   const findNodeAt = (canvasX: number, canvasY: number): SimNode | null => {
     const nodes = nodesRef.current;
     for (let i = nodes.length - 1; i >= 0; i--) {
@@ -562,14 +623,26 @@ export default function ObsidianGraphCanvas({
 
       const dx = n.x - canvasX;
       const dy = n.y - canvasY;
-      const hitRadius = Math.max(n.radius + 12, 18);
+      const hitRadius = Math.max(n.radius + 8, 16);
       if (dx * dx + dy * dy <= hitRadius * hitRadius) {
+        return n;
+      }
+
+      // Check hit against label pill positioned beneath circular node
+      const labelYStart = n.y + n.radius + 2 / zoom;
+      const labelYEnd = n.y + n.radius + 24 / zoom;
+      if (
+        canvasY >= labelYStart &&
+        canvasY <= labelYEnd &&
+        Math.abs(dx) <= Math.max(n.radius + 28, 44)
+      ) {
         return n;
       }
     }
     return null;
   };
 
+  // Handles mouse down event for node dragging or viewport panning.
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     mouseDownPosRef.current = { x: e.clientX, y: e.clientY };
     const { x, y } = screenToCanvas(e.clientX, e.clientY);
@@ -587,6 +660,7 @@ export default function ObsidianGraphCanvas({
     }
   };
 
+  // Tracks cursor movement for viewport panning, node dragging, and tooltip positioning.
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const { x, y } = screenToCanvas(e.clientX, e.clientY);
 
@@ -616,6 +690,7 @@ export default function ObsidianGraphCanvas({
     }
   };
 
+  // Completes node dragging or viewport panning on mouse button release.
   const handleMouseUp = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const distMoved = Math.hypot(
       e.clientX - mouseDownPosRef.current.x,
@@ -638,12 +713,14 @@ export default function ObsidianGraphCanvas({
     setIsInteracting(false);
   };
 
+  // Adjusts viewport zoom scale on mouse wheel scrolling.
   const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
     e.preventDefault();
     const factor = e.deltaY < 0 ? 1.12 : 0.88;
     setZoom((prev) => Math.min(Math.max(prev * factor, 0.3), 3.5));
   };
 
+  // Dismisses node inspector drawer and resets focused node state.
   const handleCloseInspector = () => {
     setSelectedNode(null);
     if (onClearFocus) onClearFocus();
@@ -652,24 +729,24 @@ export default function ObsidianGraphCanvas({
   return (
     <div className="graph-shell akaru-card overflow-hidden shadow-2xl relative select-none">
       {/* Top Controls Toolbar */}
-      <div className="graph-toolbar flex flex-wrap items-center justify-between gap-3 px-6 py-4 border-b border-white/10 bg-[#161616] text-xs">
+      <div className="graph-toolbar flex flex-wrap items-center justify-between gap-3 px-6 py-4 border-b border-[rgba(23,24,23,0.1)] bg-[#fffefa]/95 text-xs text-[#171817]">
         {/* Left: Summary Metrics & Search */}
         <div className="flex flex-wrap items-center gap-3.5">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#e49366] animate-pulse"></span>
-            <span className="font-bold text-white uppercase tracking-wider text-[11px]">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#df7d4c] animate-pulse"></span>
+            <span className="font-bold text-[#171817] uppercase tracking-wider text-[11px]">
               Dependency Network
             </span>
           </div>
-          <span className="text-white/20">|</span>
-          <span className="text-white font-medium">{graph.metrics.total_nodes} modules</span>
-          <span className="text-white/20">&bull;</span>
-          <span className="text-white font-medium">{graph.metrics.total_edges} connections</span>
+          <span className="text-[rgba(23,24,23,0.2)]">|</span>
+          <span className="text-[#171817] font-medium">{graph.metrics.total_nodes} modules</span>
+          <span className="text-[rgba(23,24,23,0.2)]">&bull;</span>
+          <span className="text-[#171817] font-medium">{graph.metrics.total_edges} connections</span>
 
           {/* Quick Node Search */}
           <div className="relative ml-2">
-            <div className="flex items-center gap-2 px-3.5 py-1.5 bg-[#0e0e0e] border border-white/15 rounded-xl focus-within:border-[#e49366] transition-all">
-              <Search className="w-3.5 h-3.5 text-[#e49366]" />
+            <div className="flex items-center gap-2 px-3.5 py-1.5 bg-[#f4efe6] border border-[rgba(23,24,23,0.12)] rounded-xl focus-within:border-[#df7d4c] transition-all">
+              <Search className="w-3.5 h-3.5 text-[#df7d4c]" />
               <input
                 type="text"
                 value={searchQuery}
@@ -679,11 +756,11 @@ export default function ObsidianGraphCanvas({
                 }}
                 onFocus={() => setIsSearchOpen(true)}
                 placeholder="Find node or module..."
-                className="bg-transparent text-white placeholder-white/40 text-xs focus:outline-none w-44 font-code"
+                className="bg-transparent text-[#171817] placeholder-[rgba(23,24,23,0.45)] text-xs focus:outline-none w-44 font-code"
               />
             </div>
             {isSearchOpen && searchResults.length > 0 && (
-              <div className="absolute top-full left-0 mt-2 w-72 akaru-dropdown shadow-2xl z-40 py-2 max-h-52 overflow-y-auto">
+              <div className="absolute top-full left-0 mt-2 w-72 akaru-dropdown shadow-2xl z-40 py-2 max-h-52 overflow-y-auto bg-[#fffefa] border border-[rgba(23,24,23,0.14)] rounded-xl">
                 {searchResults.map((res) => (
                   <button
                     key={res.id}
@@ -693,10 +770,10 @@ export default function ObsidianGraphCanvas({
                       setIsSearchOpen(false);
                       setSearchQuery("");
                     }}
-                    className="w-full text-left px-4 py-2 hover:bg-[#222222] text-xs font-code text-white hover:text-[#e49366] flex items-center justify-between group cursor-pointer"
+                    className="w-full text-left px-4 py-2 hover:bg-[rgba(223,125,76,0.08)] text-xs font-code text-[#171817] hover:text-[#df7d4c] flex items-center justify-between group cursor-pointer transition-colors"
                   >
                     <span className="truncate">{res.id}</span>
-                    <span className="text-[10px] text-white/50 group-hover:text-[#e49366]">
+                    <span className="text-[10px] text-[rgba(23,24,23,0.45)] group-hover:text-[#df7d4c]">
                       deg:{res.in_degree + res.out_degree}
                     </span>
                   </button>
@@ -712,12 +789,13 @@ export default function ObsidianGraphCanvas({
           {availableClusters.length > 1 && (
             <select
               value={selectedClusterFilter}
+              aria-label="Filter modules by Louvain community cluster"
               onChange={(e) =>
                 setSelectedClusterFilter(
                   e.target.value === "all" ? "all" : parseInt(e.target.value, 10)
                 )
               }
-              className="px-3.5 py-1.5 bg-[#0e0e0e] border border-white/20 rounded-xl text-xs text-white focus:outline-none cursor-pointer hover:border-[#e49366]"
+              className="px-3.5 py-1.5 bg-[#fffefa] border border-[rgba(23,24,23,0.14)] rounded-xl text-xs text-[#171817] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df7d4c] cursor-pointer hover:border-[#df7d4c] shadow-xs"
             >
               <option value="all">All Clusters ({availableClusters.length})</option>
               {availableClusters.map((c) => (
@@ -731,11 +809,12 @@ export default function ObsidianGraphCanvas({
           {/* Min Degree Filter */}
           <button
             type="button"
+            aria-label="Filter modules by connection degree"
             onClick={() => setMinDegreeFilter((prev) => (prev === 0 ? 1 : prev === 1 ? 2 : 0))}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border flex items-center gap-1.5 ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border flex items-center gap-1.5 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#df7d4c] ${
               minDegreeFilter > 0
-                ? "bg-[#e49366] text-[#0e0e0e] border-[#e49366]"
-                : "bg-white text-[#0e0e0e] border-white hover:bg-[#f2f2f2]"
+                ? "bg-[#df7d4c] text-[#fffdf8] border-[#df7d4c]"
+                : "bg-[#fffefa] text-[#171817] border-[rgba(23,24,23,0.14)] hover:bg-[rgba(23,24,23,0.04)]"
             }`}
           >
             <Filter className="w-3.5 h-3.5" />
@@ -748,39 +827,43 @@ export default function ObsidianGraphCanvas({
             </span>
           </button>
 
-          {/* Zoom Buttons with Bright Non-Dark Styling */}
-          <div className="flex items-center bg-white text-[#0e0e0e] rounded-xl overflow-hidden shadow-sm font-bold">
+          {/* Zoom Buttons with Warm Gallery Styling */}
+          <div className="flex items-center bg-[#fffefa] text-[#171817] border border-[rgba(23,24,23,0.14)] rounded-xl overflow-hidden shadow-xs font-bold">
             <button
               type="button"
+              aria-label="Zoom in"
               onClick={() => setZoom((z) => Math.min(z * 1.2, 3.5))}
-              className="p-2 hover:bg-slate-100 text-[#0e0e0e] transition-colors cursor-pointer"
+              className="p-2 hover:bg-[rgba(23,24,23,0.05)] text-[#171817] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#df7d4c]"
               title="Zoom In"
             >
               <Plus className="w-4 h-4" />
             </button>
             <button
               type="button"
+              aria-label="Zoom out"
               onClick={() => setZoom((z) => Math.max(z * 0.8, 0.3))}
-              className="p-2 hover:bg-slate-100 text-[#0e0e0e] transition-colors cursor-pointer border-l border-slate-200"
+              className="p-2 hover:bg-[rgba(23,24,23,0.05)] text-[#171817] transition-colors cursor-pointer border-l border-[rgba(23,24,23,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#df7d4c]"
               title="Zoom Out"
             >
               <Minus className="w-4 h-4" />
             </button>
             <button
               type="button"
+              aria-label="Fit graph to viewport"
               onClick={handleZoomToFit}
-              className="p-2 hover:bg-slate-100 text-[#0e0e0e] transition-colors cursor-pointer border-l border-slate-200"
+              className="p-2 hover:bg-[rgba(23,24,23,0.05)] text-[#171817] transition-colors cursor-pointer border-l border-[rgba(23,24,23,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#df7d4c]"
               title="Fit to Screen"
             >
               <Maximize2 className="w-4 h-4" />
             </button>
             <button
               type="button"
+              aria-label="Reset viewport pan and zoom"
               onClick={() => {
                 setZoom(1);
                 setPan({ x: 0, y: 0 });
               }}
-              className="p-2 hover:bg-slate-100 text-[#0e0e0e] transition-colors cursor-pointer border-l border-slate-200"
+              className="p-2 hover:bg-[rgba(23,24,23,0.05)] text-[#171817] transition-colors cursor-pointer border-l border-[rgba(23,24,23,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#df7d4c]"
               title="Reset View"
             >
               <RotateCcw className="w-4 h-4" />
@@ -790,7 +873,7 @@ export default function ObsidianGraphCanvas({
       </div>
 
       {/* Interactive Canvas Viewport */}
-      <div className="graph-viewport relative w-full h-[580px] bg-[#0e0e0e] overflow-hidden">
+      <div className="graph-viewport relative w-full h-[580px] bg-[#fbfaf6] overflow-hidden">
         <canvas
           ref={canvasRef}
           onMouseDown={handleMouseDown}
@@ -804,34 +887,34 @@ export default function ObsidianGraphCanvas({
         {/* Dynamic Interactive Hover Pop-Up Card */}
         {hoveredNode && hoverScreenPos && !selectedNode && (
           <div
-            className="absolute z-30 pointer-events-none akaru-dropdown p-4 shadow-2xl border border-[#e49366]/40 text-xs text-white transition-opacity duration-150 space-y-2.5 min-w-64"
+            className="absolute z-30 pointer-events-none akaru-dropdown p-4 shadow-2xl border border-[#df7d4c]/40 text-xs text-[#171817] bg-[#fffefa]/98 transition-opacity duration-150 space-y-2.5 min-w-64"
             style={{
               left: Math.min(Math.max(hoverScreenPos.x + 18, 14), 660),
               top: Math.min(Math.max(hoverScreenPos.y - 40, 14), 440),
             }}
           >
-            <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-2">
-              <span className="font-bold text-white truncate max-w-44 text-sm">{hoveredNode.label}</span>
-              <span className="text-[10px] px-2 py-0.5 bg-[#e49366] text-[#0e0e0e] rounded-md font-bold uppercase">
+            <div className="flex items-center justify-between gap-2 border-b border-[rgba(23,24,23,0.1)] pb-2">
+              <span className="font-bold text-[#171817] truncate max-w-44 text-sm">{hoveredNode.label}</span>
+              <span className="text-[10px] px-2 py-0.5 bg-[#df7d4c] text-[#fffdf8] rounded-md font-bold uppercase">
                 {hoveredNode.language}
               </span>
             </div>
-            <div className="text-[11px] font-code text-[#9e9e9e] truncate">{hoveredNode.id}</div>
+            <div className="text-[11px] font-code text-[#77756f] truncate">{hoveredNode.id}</div>
             <div className="grid grid-cols-3 gap-2 pt-1 text-center">
-              <div className="p-1.5 bg-[#171717] rounded-lg border border-white/10">
-                <div className="text-[9px] text-[#9e9e9e] uppercase font-bold">Callers</div>
-                <strong className="text-white text-xs">{hoveredNode.in_degree}</strong>
+              <div className="p-1.5 bg-[rgba(23,24,23,0.04)] rounded-lg border border-[rgba(23,24,23,0.08)]">
+                <div className="text-[9px] text-[#77756f] uppercase font-bold">Callers</div>
+                <strong className="text-[#171817] text-xs">{hoveredNode.in_degree}</strong>
               </div>
-              <div className="p-1.5 bg-[#171717] rounded-lg border border-white/10">
-                <div className="text-[9px] text-[#9e9e9e] uppercase font-bold">Imports</div>
-                <strong className="text-[#e49366] text-xs">{hoveredNode.out_degree}</strong>
+              <div className="p-1.5 bg-[rgba(23,24,23,0.04)] rounded-lg border border-[rgba(23,24,23,0.08)]">
+                <div className="text-[9px] text-[#77756f] uppercase font-bold">Imports</div>
+                <strong className="text-[#df7d4c] text-xs">{hoveredNode.out_degree}</strong>
               </div>
-              <div className="p-1.5 bg-[#171717] rounded-lg border border-white/10">
-                <div className="text-[9px] text-[#9e9e9e] uppercase font-bold">Lines</div>
-                <strong className="text-white text-xs">{hoveredNode.line_count}</strong>
+              <div className="p-1.5 bg-[rgba(23,24,23,0.04)] rounded-lg border border-[rgba(23,24,23,0.08)]">
+                <div className="text-[9px] text-[#77756f] uppercase font-bold">Lines</div>
+                <strong className="text-[#171817] text-xs">{hoveredNode.line_count}</strong>
               </div>
             </div>
-            <div className="text-[10px] text-[#e49366] pt-0.5 flex items-center justify-between font-semibold">
+            <div className="text-[10px] text-[#df7d4c] pt-0.5 flex items-center justify-between font-semibold">
               <span>Click node to inspect AST &amp; code</span>
               <span>&rarr;</span>
             </div>
@@ -839,19 +922,19 @@ export default function ObsidianGraphCanvas({
         )}
 
         {/* Legend Overlay */}
-        <div className="absolute top-4 left-4 flex items-center gap-4 text-xs font-semibold akaru-card-sm px-4 py-2 text-white pointer-events-none shadow-lg">
+        <div className="absolute top-4 left-4 flex items-center gap-4 text-xs font-semibold akaru-card-sm px-4 py-2 text-[#171817] pointer-events-none shadow-md">
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-white"></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#171817]"></span>
             <span>Caller (Inbound)</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#e49366]"></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#df7d4c]"></span>
             <span>Import (Outbound)</span>
           </div>
         </div>
 
         {/* Instructions Footer */}
-        <div className="absolute bottom-4 left-4 text-[11px] text-[#9e9e9e] akaru-card-sm px-3.5 py-1.5 pointer-events-none shadow-lg font-medium">
+        <div className="absolute bottom-4 left-4 text-[11px] text-[#77756f] akaru-card-sm px-3.5 py-1.5 pointer-events-none shadow-md font-medium">
           Click any module to inspect AST &bull; Drag to pan &bull; Scroll to zoom
         </div>
 

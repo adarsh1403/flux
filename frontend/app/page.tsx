@@ -1,17 +1,8 @@
+// Main application page for FLUX codebase architecture and synthesis.
 "use client";
 
-/**
- * FLUX — Codebase Architecture & Autonomous Synthesis Platform.
- * Akaru Prestige Design System Edition:
- * - Primary: #e49366 (Warm Terracotta)
- * - Background: #0e0e0e (Gallery Near-Black)
- * - Surface/Cards: #151515 / #1c1c1c with crisp white and #9e9e9e borders
- * - Typography: Display Sans (Alliance Neue style) with high-contrast pure white text
- * - Bright, Non-Dark Buttons: Solid Terracotta #e49366 and Pure White #ffffff
- * - Static network graph with active warm terracotta data pulses.
- */
-
 import React, { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import {
   ingestRepository,
   buildRepoGraph,
@@ -43,6 +34,7 @@ import {
   FolderGit2,
 } from "lucide-react";
 
+// Main component managing repository ingestion, architecture graph, and issue explorer.
 export default function Home() {
   const [repoUrl, setRepoUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -75,6 +67,7 @@ export default function Home() {
   const [autoPipelineRunning, setAutoPipelineRunning] = useState(false);
   const [autoPipelineStep, setAutoPipelineStep] = useState<string>("");
 
+  // Executes autonomous multi-phase ingestion, graph construction, and AI synthesis pipeline.
   const handleAutoPipeline = async (overrideUrl?: string) => {
     const urlToRun = (overrideUrl || repoUrl).trim();
     if (!urlToRun) return;
@@ -122,6 +115,7 @@ export default function Home() {
     }
   };
 
+  // Focuses on target node in architecture graph and scrolls canvas into viewport.
   const handleJumpToNode = (nodeId: string) => {
     setFocusedGraphNodeId(nodeId);
     setMainTab("graph");
@@ -130,6 +124,7 @@ export default function Home() {
     }
   };
 
+  // Ingests repository metadata and loads existing graph and understanding if available.
   const handleIngest = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!repoUrl.trim()) return;
@@ -169,6 +164,7 @@ export default function Home() {
     }
   };
 
+  // Builds and models dependency graph from parsed AST structure.
   const handleBuildGraph = async () => {
     if (!repo) return;
     setGraphLoading(true);
@@ -185,6 +181,7 @@ export default function Home() {
     }
   };
 
+  // Synthesizes architectural summaries, component flows, and feature maps via Gemini.
   const handleGenerateUnderstanding = async () => {
     if (!repo) return;
     setUnderstandingLoading(true);
@@ -201,6 +198,7 @@ export default function Home() {
     }
   };
 
+  // Resets active repository state and returns view to initial ingestion screen.
   const handleResetRepo = () => {
     setRepo(null);
     setGraph(null);
@@ -210,7 +208,7 @@ export default function Home() {
   };
 
   return (
-    <main className="flux-shell min-h-screen bg-[#0e0e0e] bg-akaru-grid relative flex flex-col selection:bg-[#e49366]/30 selection:text-[#ffffff]">
+    <main className="flux-shell min-h-screen bg-[#f7f4ec] bg-akaru-grid relative flex flex-col selection:bg-[#df7d4c]/30 selection:text-[#171817]">
       {/* Ambient Akaru Terracotta Glow */}
       <div className="absolute inset-0 bg-akaru-radial pointer-events-none"></div>
 
@@ -228,15 +226,22 @@ export default function Home() {
       )}
 
       {/* Clean Minimalist Gallery Header */}
-      <header className="flux-header border-b border-white/10 bg-[#0e0e0e]/80 backdrop-blur-xl px-6 py-4 sm:px-12 flex items-center justify-between sticky top-0 z-40">
-        {/* Brand Mark with Terracotta Dot */}
-        <div className="flex items-center gap-3 cursor-pointer" onClick={handleResetRepo}>
-          <div className="w-8 h-8 rounded-xl bg-[#e49366] text-[#0e0e0e] flex items-center justify-center font-extrabold shadow-md shadow-[#e49366]/25">
-            <span className="text-sm tracking-tight">F</span>
+      <header className="flux-header border-b border-[rgba(23,24,23,0.1)] bg-[rgba(247,244,236,0.85)] backdrop-blur-xl px-6 py-4 sm:px-12 flex items-center justify-between sticky top-0 z-40">
+        {/* Brand Mark with Flowing Wave Logo */}
+        <div className="flex items-center gap-3 cursor-pointer group" onClick={handleResetRepo}>
+          <div className="flex items-center justify-center">
+            <Image
+              src="/logo.png"
+              alt="FLUX Logo"
+              width={74}
+              height={32}
+              priority
+              className="h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-105 drop-shadow-[0_2px_12px_rgba(228,147,102,0.3)]"
+            />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-lg font-extrabold tracking-tight text-white">FLUX</span>
-            <span className="text-[10px] font-code px-2 py-0.5 bg-[#e49366]/20 text-[#e49366] rounded-md font-bold">
+            <span className="text-lg font-extrabold tracking-tight text-[#171817] group-hover:text-[#df7d4c] transition-colors">FLUX</span>
+            <span className="text-[10px] font-code px-2 py-0.5 bg-[#df7d4c]/15 text-[#df7d4c] rounded-md font-bold">
               Studio
             </span>
           </div>
@@ -277,18 +282,14 @@ export default function Home() {
       {!repo && (
         <div className="flux-intro flex-1 flex flex-col items-center justify-center px-4 py-20 max-w-4xl mx-auto w-full text-center relative z-10 space-y-10">
           {/* Hero Headlines */}
-          <div className="space-y-5 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#e49366]/15 border border-[#e49366]/40 text-[#e49366] text-xs font-bold shadow-lg shadow-[#e49366]/10">
-              <CloudCog className="flux-cloud-mark w-5 h-5" strokeWidth={2.5} />
-              <span>AST Architecture &amp; Autonomous Resolution</span>
-            </div>
-            <h1 className="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-tight">
+          <div className="space-y-4 max-w-2xl">
+            <h1 className="text-4xl sm:text-6xl font-extrabold text-[#171817] tracking-tight leading-tight">
               Understand Any Codebase in{" "}
-              <span className="text-[#e49366] underline decoration-[#e49366]/40 decoration-wavy underline-offset-8">
+              <span className="text-[#df7d4c] underline decoration-[#df7d4c]/40 decoration-wavy underline-offset-8">
                 Seconds
               </span>
             </h1>
-            <p className="text-sm sm:text-base text-[#9e9e9e] leading-relaxed max-w-xl mx-auto">
+            <p className="text-sm sm:text-base text-[#6b6963] leading-relaxed max-w-xl mx-auto">
               Explore complex repository architectures, trace AST dependency networks, and solve issues autonomously with grounded AI synthesis.
             </p>
           </div>
@@ -296,8 +297,8 @@ export default function Home() {
           {/* Centered Glowing Ingest Card */}
           <div className="flux-search-panel w-full max-w-2xl akaru-card p-5 sm:p-7 shadow-2xl space-y-5">
             <form onSubmit={handleIngest} className="flex flex-col sm:flex-row gap-3">
-              <div className="flex-1 relative flex items-center bg-[#0e0e0e] border border-white/20 rounded-2xl focus-within:border-[#e49366] focus-within:ring-2 focus-within:ring-[#e49366]/20 transition-all">
-                <div className="pl-4 pr-2 text-[#e49366] flex items-center">
+              <div className="flex-1 relative flex items-center bg-[#fffefa] border border-[rgba(23,24,23,0.15)] rounded-2xl focus-within:border-[#df7d4c] focus-within:ring-2 focus-within:ring-[#df7d4c]/20 shadow-xs transition-all">
+                <div className="pl-4 pr-2 text-[#df7d4c] flex items-center">
                   <FolderGit2 className="w-5 h-5" />
                 </div>
                 <input
@@ -305,18 +306,19 @@ export default function Home() {
                   value={repoUrl}
                   onChange={(e) => setRepoUrl(e.target.value)}
                   placeholder="https://github.com/owner/repository or owner/repo"
+                  aria-label="GitHub repository URL"
                   disabled={loading || autoPipelineRunning}
-                  className="flex-1 py-3.5 bg-transparent text-sm text-white placeholder-white/40 focus:outline-none font-code"
+                  className="flex-1 py-3.5 bg-transparent text-sm text-[#171817] placeholder-[rgba(23,24,23,0.4)] focus:outline-none font-code disabled:opacity-50"
                   required
                 />
               </div>
 
-              {/* Bright Action Buttons */}
+              {/* Action Buttons */}
               <div className="flex gap-2.5 shrink-0">
                 <button
                   type="submit"
                   disabled={loading || autoPipelineRunning || !repoUrl.trim()}
-                  className="btn-white px-5 py-3.5 text-xs font-bold cursor-pointer disabled:opacity-50"
+                  className="btn-white px-5 py-3.5 text-xs font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading && !autoPipelineRunning ? "Ingesting..." : "Ingest"}
                 </button>
@@ -324,7 +326,7 @@ export default function Home() {
                   type="button"
                   onClick={() => handleAutoPipeline()}
                   disabled={loading || autoPipelineRunning || !repoUrl.trim()}
-                  className="btn-terracotta px-6 py-3.5 text-xs font-extrabold cursor-pointer flex items-center gap-2 disabled:opacity-50"
+                  className="btn-terracotta px-6 py-3.5 text-xs font-extrabold cursor-pointer flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Play className="w-4 h-4 fill-current" />
                   <span>{autoPipelineRunning ? "Analyzing..." : "Full Analysis"}</span>
@@ -334,7 +336,7 @@ export default function Home() {
 
             {/* Quick Starter Chips */}
             <div className="flex flex-wrap items-center justify-center gap-2.5 pt-1 text-xs">
-              <span className="text-[#9e9e9e] text-xs font-semibold">Quick Samples:</span>
+              <span className="text-[#6b6963] text-xs font-semibold">Quick Samples:</span>
               {[
                 { name: "pallets/flask" },
                 { name: "fastapi/fastapi" },
@@ -343,9 +345,10 @@ export default function Home() {
                 <button
                   key={sample.name}
                   type="button"
+                  aria-label={`Load sample repository ${sample.name}`}
                   onClick={() => handleAutoPipeline(`https://github.com/${sample.name}`)}
                   disabled={loading || autoPipelineRunning}
-                  className="px-3.5 py-1.5 bg-[#1a1a1a] hover:bg-[#242424] text-white hover:text-[#e49366] rounded-xl border border-white/10 hover:border-[#e49366] transition-all cursor-pointer font-code text-[11px]"
+                  className="px-3.5 py-1.5 bg-[#fffefa] hover:bg-[#f4efe6] text-[#171817] hover:text-[#df7d4c] rounded-xl border border-[rgba(23,24,23,0.12)] hover:border-[#df7d4c] transition-all cursor-pointer font-code text-[11px] shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {sample.name}
                 </button>
@@ -355,12 +358,12 @@ export default function Home() {
 
           {/* Pipeline Step Notification */}
           {autoPipelineStep && (
-            <div className="w-full max-w-2xl p-4 bg-[#141414] border border-[#e49366]/40 rounded-2xl text-xs font-code text-white flex items-center justify-between shadow-2xl">
+            <div className="w-full max-w-2xl p-4 bg-[#fffefa] border border-[#df7d4c]/40 rounded-2xl text-xs font-code text-[#171817] flex items-center justify-between shadow-lg">
               <div className="flex items-center gap-3">
-                <div className="w-4 h-4 border-2 border-[#e49366] border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-4 h-4 border-2 border-[#df7d4c] border-t-transparent rounded-full animate-spin"></div>
                 <span>{autoPipelineStep}</span>
               </div>
-              <span className="text-[10px] text-[#e49366] font-sans font-bold uppercase tracking-wider">
+              <span className="text-[10px] text-[#df7d4c] font-sans font-bold uppercase tracking-wider">
                 Autonomous Pipeline
               </span>
             </div>
@@ -368,39 +371,39 @@ export default function Home() {
 
           {/* Error Banner */}
           {error && (
-            <div className="w-full max-w-2xl p-4 bg-red-950/60 border border-red-800 rounded-2xl text-xs font-code text-red-300 text-left">
+            <div className="w-full max-w-2xl p-4 alert-terracotta-error rounded-2xl text-xs font-code text-left">
               Error: {error}
             </div>
           )}
 
           {/* 3 Capability Highlight Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 w-full max-w-3xl pt-6 text-left">
-            <div className="akaru-card-sm p-5 space-y-2.5">
-              <div className="w-9 h-9 rounded-xl bg-white text-[#0e0e0e] flex items-center justify-center font-bold">
+            <div className="akaru-card-sm p-5 space-y-2.5 bg-[#fffefa] border border-[rgba(23,24,23,0.12)] rounded-2xl shadow-xs">
+              <div className="w-9 h-9 rounded-xl bg-[#df7d4c]/15 text-[#df7d4c] flex items-center justify-center font-bold">
                 <Layers className="w-4 h-4" />
               </div>
-              <h3 className="font-extrabold text-white text-sm">AST Dependency Graph</h3>
-              <p className="text-xs text-[#9e9e9e] leading-relaxed">
+              <h3 className="font-extrabold text-[#171817] text-sm">AST Dependency Graph</h3>
+              <p className="text-xs text-[#6b6963] leading-relaxed">
                 Explore static code structure with continuous network energy pulses and callers tracking.
               </p>
             </div>
 
-            <div className="akaru-card-sm p-5 space-y-2.5">
-              <div className="w-9 h-9 rounded-xl bg-[#e49366] text-[#0e0e0e] flex items-center justify-center font-bold">
+            <div className="akaru-card-sm p-5 space-y-2.5 bg-[#fffefa] border border-[rgba(23,24,23,0.12)] rounded-2xl shadow-xs">
+              <div className="w-9 h-9 rounded-xl bg-[#df7d4c]/15 text-[#df7d4c] flex items-center justify-center font-bold">
                 <CloudCog className="w-4 h-4" strokeWidth={2.25} />
               </div>
-              <h3 className="font-extrabold text-white text-sm">Grounded Intelligence</h3>
-              <p className="text-xs text-[#9e9e9e] leading-relaxed">
+              <h3 className="font-extrabold text-[#171817] text-sm">Grounded Intelligence</h3>
+              <p className="text-xs text-[#6b6963] leading-relaxed">
                 Plain-English architecture flows and feature maps synthesized from AST source files.
               </p>
             </div>
 
-            <div className="akaru-card-sm p-5 space-y-2.5">
-              <div className="w-9 h-9 rounded-xl bg-white text-[#0e0e0e] flex items-center justify-center font-bold">
+            <div className="akaru-card-sm p-5 space-y-2.5 bg-[#fffefa] border border-[rgba(23,24,23,0.12)] rounded-2xl shadow-xs">
+              <div className="w-9 h-9 rounded-xl bg-[#df7d4c]/15 text-[#df7d4c] flex items-center justify-center font-bold">
                 <CircleDot className="w-4 h-4" />
               </div>
-              <h3 className="font-extrabold text-white text-sm">Autonomous Fixes</h3>
-              <p className="text-xs text-[#9e9e9e] leading-relaxed">
+              <h3 className="font-extrabold text-[#171817] text-sm">Autonomous Fixes</h3>
+              <p className="text-xs text-[#6b6963] leading-relaxed">
                 Translate bug reports into verified multi-file code diffs and GitHub Pull Requests.
               </p>
             </div>
@@ -416,15 +419,15 @@ export default function Home() {
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-3">
-                  <h2 className="text-2xl font-extrabold text-white tracking-tight">
+                  <h2 className="text-2xl font-extrabold text-[#171817] tracking-tight">
                     {repo.owner}/{repo.name}
                   </h2>
-                  <span className="px-3 py-1 text-xs font-code bg-[#e49366] text-[#0e0e0e] rounded-md font-bold uppercase">
+                  <span className="px-3 py-1 text-xs font-code bg-[#df7d4c]/15 text-[#df7d4c] border border-[#df7d4c]/30 rounded-md font-bold uppercase">
                     {repo.language || "Multi-language"}
                   </span>
                 </div>
                 {repo.description && (
-                  <p className="text-xs text-[#9e9e9e] mt-1.5 max-w-2xl leading-relaxed">
+                  <p className="text-xs text-[#6b6963] mt-1.5 max-w-2xl leading-relaxed">
                     {repo.description}
                   </p>
                 )}
@@ -444,7 +447,7 @@ export default function Home() {
                   type="button"
                   onClick={handleBuildGraph}
                   disabled={graphLoading}
-                  className="btn-white px-4 py-2 text-xs font-bold cursor-pointer disabled:opacity-50"
+                  className="btn-white px-4 py-2 text-xs font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {graphLoading ? "Parsing..." : graph ? "Rebuild Graph" : "Build Graph"}
                 </button>
@@ -452,7 +455,7 @@ export default function Home() {
                   type="button"
                   onClick={handleGenerateUnderstanding}
                   disabled={understandingLoading}
-                  className="btn-terracotta px-4 py-2 text-xs font-extrabold cursor-pointer disabled:opacity-50"
+                  className="btn-terracotta px-4 py-2 text-xs font-extrabold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {understandingLoading
                     ? "Analyzing..."
@@ -464,47 +467,49 @@ export default function Home() {
             </div>
 
             {/* Metrics Strip */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-white/10 text-xs">
-              <div className="p-3 bg-[#0e0e0e] rounded-xl border border-white/10 flex items-center justify-between">
-                <span className="flex items-center gap-2 text-[#9e9e9e] font-semibold">
-                  <Star className="w-4 h-4 text-[#e49366]" />
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-[rgba(23,24,23,0.1)] text-xs">
+              <div className="p-3 bg-[#fffefa] rounded-xl border border-[rgba(23,24,23,0.1)] flex items-center justify-between shadow-xs">
+                <span className="flex items-center gap-2 text-[#6b6963] font-semibold">
+                  <Star className="w-4 h-4 text-[#df7d4c]" />
                   Stars:
                 </span>
-                <strong className="text-white font-code text-sm">{repo.stars.toLocaleString()}</strong>
+                <strong className="text-[#171817] font-code text-sm">{repo.stars.toLocaleString()}</strong>
               </div>
-              <div className="p-3 bg-[#0e0e0e] rounded-xl border border-white/10 flex items-center justify-between">
-                <span className="flex items-center gap-2 text-[#9e9e9e] font-semibold">
-                  <CircleDot className="w-4 h-4 text-[#e49366]" />
+              <div className="p-3 bg-[#fffefa] rounded-xl border border-[rgba(23,24,23,0.1)] flex items-center justify-between shadow-xs">
+                <span className="flex items-center gap-2 text-[#6b6963] font-semibold">
+                  <CircleDot className="w-4 h-4 text-[#df7d4c]" />
                   Open Issues:
                 </span>
-                <strong className="text-white font-code text-sm">{repo.open_issues_count.toLocaleString()}</strong>
+                <strong className="text-[#171817] font-code text-sm">{repo.open_issues_count.toLocaleString()}</strong>
               </div>
-              <div className="p-3 bg-[#0e0e0e] rounded-xl border border-white/10 flex items-center justify-between">
-                <span className="flex items-center gap-2 text-[#9e9e9e] font-semibold">
-                  <FileCode className="w-4 h-4 text-white" />
+              <div className="p-3 bg-[#fffefa] rounded-xl border border-[rgba(23,24,23,0.1)] flex items-center justify-between shadow-xs">
+                <span className="flex items-center gap-2 text-[#6b6963] font-semibold">
+                  <FileCode className="w-4 h-4 text-[#171817]" />
                   Files Cloned:
                 </span>
-                <strong className="text-white font-code text-sm">{repo.file_count.toLocaleString()}</strong>
+                <strong className="text-[#171817] font-code text-sm">{repo.file_count.toLocaleString()}</strong>
               </div>
-              <div className="p-3 bg-[#0e0e0e] rounded-xl border border-white/10 flex items-center justify-between">
-                <span className="flex items-center gap-2 text-[#9e9e9e] font-semibold">
-                  <GitBranch className="w-4 h-4 text-[#e49366]" />
+              <div className="p-3 bg-[#fffefa] rounded-xl border border-[rgba(23,24,23,0.1)] flex items-center justify-between shadow-xs">
+                <span className="flex items-center gap-2 text-[#6b6963] font-semibold">
+                  <GitBranch className="w-4 h-4 text-[#df7d4c]" />
                   Branch:
                 </span>
-                <strong className="text-white font-code text-sm">{repo.default_branch || "main"}</strong>
+                <strong className="text-[#171817] font-code text-sm">{repo.default_branch || "main"}</strong>
               </div>
             </div>
           </div>
 
           {/* Workspace Navigation Tabs with Terracotta Underline */}
-          <div className="flex border-b border-white/10 text-xs font-bold gap-3">
+          <div role="tablist" aria-label="Workspace Sections" className="flex border-b border-[rgba(23,24,23,0.12)] text-xs font-bold gap-3">
             <button
               type="button"
+              role="tab"
+              aria-selected={mainTab === "graph"}
               onClick={() => setMainTab("graph")}
-              className={`pb-3.5 px-4 transition-all cursor-pointer flex items-center gap-2 border-b-2 ${
+              className={`pb-3.5 px-4 transition-all cursor-pointer flex items-center gap-2 border-b-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#df7d4c] ${
                 mainTab === "graph"
-                  ? "text-[#e49366] border-[#e49366]"
-                  : "text-white/60 border-transparent hover:text-white"
+                  ? "text-[#df7d4c] border-[#df7d4c]"
+                  : "text-[#6b6963] border-transparent hover:text-[#171817]"
               }`}
             >
               <Layers className="w-4 h-4" />
@@ -513,27 +518,31 @@ export default function Home() {
 
             <button
               type="button"
+              role="tab"
+              aria-selected={mainTab === "understanding"}
               onClick={() => setMainTab("understanding")}
-              className={`pb-3.5 px-4 transition-all cursor-pointer flex items-center gap-2 border-b-2 ${
+              className={`pb-3.5 px-4 transition-all cursor-pointer flex items-center gap-2 border-b-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#df7d4c] ${
                 mainTab === "understanding"
-                  ? "text-[#e49366] border-[#e49366]"
-                  : "text-white/60 border-transparent hover:text-white"
+                  ? "text-[#df7d4c] border-[#df7d4c]"
+                  : "text-[#6b6963] border-transparent hover:text-[#171817]"
               }`}
             >
-                <CloudCog className="w-4 h-4" strokeWidth={2.25} />
+              <CloudCog className="w-4 h-4" strokeWidth={2.25} />
               <span>Grounded Intelligence</span>
               {understanding && (
-                <span className="w-2 h-2 rounded-full bg-[#e49366]"></span>
+                <span className="w-2 h-2 rounded-full bg-[#df7d4c]"></span>
               )}
             </button>
 
             <button
               type="button"
+              role="tab"
+              aria-selected={mainTab === "issues"}
               onClick={() => setMainTab("issues")}
-              className={`pb-3.5 px-4 transition-all cursor-pointer flex items-center gap-2 border-b-2 ${
+              className={`pb-3.5 px-4 transition-all cursor-pointer flex items-center gap-2 border-b-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#df7d4c] ${
                 mainTab === "issues"
-                  ? "text-[#e49366] border-[#e49366]"
-                  : "text-white/60 border-transparent hover:text-white"
+                  ? "text-[#df7d4c] border-[#df7d4c]"
+                  : "text-[#6b6963] border-transparent hover:text-[#171817]"
               }`}
             >
               <CircleDot className="w-4 h-4" />
@@ -542,11 +551,13 @@ export default function Home() {
 
             <button
               type="button"
+              role="tab"
+              aria-selected={mainTab === "docs"}
               onClick={() => setMainTab("docs")}
-              className={`pb-3.5 px-4 transition-all cursor-pointer flex items-center gap-2 border-b-2 ${
+              className={`pb-3.5 px-4 transition-all cursor-pointer flex items-center gap-2 border-b-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#df7d4c] ${
                 mainTab === "docs"
-                  ? "text-[#e49366] border-[#e49366]"
-                  : "text-white/60 border-transparent hover:text-white"
+                  ? "text-[#df7d4c] border-[#df7d4c]"
+                  : "text-[#6b6963] border-transparent hover:text-[#171817]"
               }`}
             >
               <BookOpen className="w-4 h-4" />
@@ -558,7 +569,7 @@ export default function Home() {
           {mainTab === "graph" && (
             <div ref={graphSectionRef} className="space-y-4">
               {graphError && (
-                <div className="p-4 bg-red-950/60 border border-red-800 text-xs font-code text-red-300 rounded-2xl">
+                <div className="p-4 alert-terracotta-error text-xs font-code rounded-2xl">
                   Graph Error: {graphError}
                 </div>
               )}
@@ -572,13 +583,13 @@ export default function Home() {
                   onClearFocus={() => setFocusedGraphNodeId(null)}
                 />
               ) : (
-                <div className="p-16 text-center akaru-card space-y-4 text-xs text-[#9e9e9e]">
+                <div className="p-16 text-center akaru-card space-y-4 text-xs text-[#6b6963]">
                   <p>Dependency network not computed yet.</p>
                   <button
                     type="button"
                     onClick={handleBuildGraph}
                     disabled={graphLoading}
-                    className="btn-terracotta px-5 py-2.5 text-xs font-bold cursor-pointer"
+                    className="btn-terracotta px-5 py-2.5 text-xs font-bold cursor-pointer disabled:opacity-50"
                   >
                     {graphLoading ? "Parsing AST..." : "Build Dependency Network"}
                   </button>
@@ -591,54 +602,60 @@ export default function Home() {
           {mainTab === "understanding" && (
             <div className="space-y-4">
               {understandingLoading && (
-                <div className="p-12 text-center text-xs text-white akaru-card space-y-3">
-                  <div className="w-6 h-6 border-2 border-[#e49366] border-t-transparent rounded-full animate-spin mx-auto"></div>
+                <div className="p-12 text-center text-xs text-[#171817] akaru-card space-y-3">
+                  <div className="w-6 h-6 border-2 border-[#df7d4c] border-t-transparent rounded-full animate-spin mx-auto"></div>
                   <p>Synthesizing grounded architecture intelligence via Gemini...</p>
                 </div>
               )}
 
               {understandingError && (
-                <div className="p-4 bg-red-950/60 border border-red-800 text-xs font-code text-red-300 rounded-2xl">
+                <div className="p-4 alert-terracotta-error text-xs font-code rounded-2xl">
                   Understanding Error: {understandingError}
                 </div>
               )}
 
               {understanding && !understandingLoading && (
                 <div className="akaru-card p-6 sm:p-8 space-y-6 shadow-2xl">
-                  <div className="flex items-center justify-between border-b border-white/10 pb-5">
-                    <span className="text-xs font-extrabold uppercase tracking-wider text-white">
+                  <div className="flex flex-wrap items-center justify-between border-b border-[rgba(23,24,23,0.1)] pb-5 gap-3">
+                    <span className="text-xs font-extrabold uppercase tracking-wider text-[#171817]">
                       Architectural Intelligence Base
                     </span>
-                    <div className="flex gap-2 text-xs">
+                    <div role="tablist" aria-label="Understanding Categories" className="flex flex-wrap gap-2 text-xs">
                       <button
                         type="button"
+                        role="tab"
+                        aria-selected={understandingTab === "overview"}
                         onClick={() => setUnderstandingTab("overview")}
-                        className={`px-4 py-2 rounded-xl transition-all cursor-pointer font-bold ${
+                        className={`px-4 py-2 rounded-xl transition-all cursor-pointer font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#df7d4c] ${
                           understandingTab === "overview"
-                            ? "bg-[#e49366] text-[#0e0e0e]"
-                            : "btn-outline-white"
+                            ? "bg-[#df7d4c] text-[#fffdf8] shadow-xs"
+                            : "bg-[#fffefa] text-[#171817] border border-[rgba(23,24,23,0.12)] hover:border-[#df7d4c]"
                         }`}
                       >
                         Overview
                       </button>
                       <button
                         type="button"
+                        role="tab"
+                        aria-selected={understandingTab === "architecture"}
                         onClick={() => setUnderstandingTab("architecture")}
-                        className={`px-4 py-2 rounded-xl transition-all cursor-pointer font-bold ${
+                        className={`px-4 py-2 rounded-xl transition-all cursor-pointer font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#df7d4c] ${
                           understandingTab === "architecture"
-                            ? "bg-[#e49366] text-[#0e0e0e]"
-                            : "btn-outline-white"
+                            ? "bg-[#df7d4c] text-[#fffdf8] shadow-xs"
+                            : "bg-[#fffefa] text-[#171817] border border-[rgba(23,24,23,0.12)] hover:border-[#df7d4c]"
                         }`}
                       >
                         Component Flows ({understanding.flows?.length || 0})
                       </button>
                       <button
                         type="button"
+                        role="tab"
+                        aria-selected={understandingTab === "features"}
                         onClick={() => setUnderstandingTab("features")}
-                        className={`px-4 py-2 rounded-xl transition-all cursor-pointer font-bold ${
+                        className={`px-4 py-2 rounded-xl transition-all cursor-pointer font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#df7d4c] ${
                           understandingTab === "features"
-                            ? "bg-[#e49366] text-[#0e0e0e]"
-                            : "btn-outline-white"
+                            ? "bg-[#df7d4c] text-[#fffdf8] shadow-xs"
+                            : "bg-[#fffefa] text-[#171817] border border-[rgba(23,24,23,0.12)] hover:border-[#df7d4c]"
                         }`}
                       >
                         Feature Map ({understanding.feature_map.length})
@@ -648,7 +665,7 @@ export default function Home() {
 
                   {/* Sub-tab 1: Overview */}
                   {understandingTab === "overview" && (
-                    <div className="text-xs text-white leading-relaxed whitespace-pre-wrap bg-[#0e0e0e] p-6 rounded-2xl border border-white/10">
+                    <div className="text-xs text-[#171817] leading-relaxed whitespace-pre-wrap bg-[#fffefa] p-6 rounded-2xl border border-[rgba(23,24,23,0.12)] shadow-xs">
                       {understanding.overview}
                     </div>
                   )}
@@ -656,7 +673,7 @@ export default function Home() {
                   {/* Sub-tab 2: Architecture Flows */}
                   {understandingTab === "architecture" && (
                     <div className="space-y-4 text-xs">
-                      <div className="text-white leading-relaxed whitespace-pre-wrap bg-[#0e0e0e] p-6 rounded-2xl border border-white/10">
+                      <div className="text-[#171817] leading-relaxed whitespace-pre-wrap bg-[#fffefa] p-6 rounded-2xl border border-[rgba(23,24,23,0.12)] shadow-xs">
                         {understanding.architecture_summary}
                       </div>
                       {understanding.flows && understanding.flows.length > 0 && (
@@ -664,29 +681,29 @@ export default function Home() {
                           {understanding.flows.map((flow, i) => (
                             <div
                               key={i}
-                              className="p-5 bg-[#141414] border border-white/10 rounded-2xl space-y-3 text-xs"
+                              className="p-5 bg-[#fffefa] border border-[rgba(23,24,23,0.12)] rounded-2xl space-y-3 text-xs shadow-xs"
                             >
                               <div className="flex items-center justify-between">
-                                <span className="font-extrabold text-white text-sm">{flow.component}</span>
+                                <span className="font-extrabold text-[#171817] text-sm">{flow.component}</span>
                                 <button
                                   type="button"
                                   onClick={() => handleJumpToNode(flow.central_file)}
-                                  className="text-[#e49366] font-code underline cursor-pointer text-xs flex items-center gap-1 font-bold"
+                                  className="text-[#df7d4c] font-code underline cursor-pointer text-xs flex items-center gap-1 font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#df7d4c] rounded-md"
                                 >
                                   <span>{flow.central_file}</span>
                                   <ArrowRight className="w-3.5 h-3.5" />
                                 </button>
                               </div>
-                              <p className="text-[#9e9e9e] text-xs leading-relaxed">{flow.role}</p>
+                              <p className="text-[#6b6963] text-xs leading-relaxed">{flow.role}</p>
                               {flow.connections && flow.connections.length > 0 && (
-                                <div className="text-[10px] text-[#9e9e9e] font-code flex flex-wrap gap-1.5 pt-2.5 border-t border-white/10">
+                                <div className="text-[10px] text-[#6b6963] font-code flex flex-wrap gap-1.5 pt-2.5 border-t border-[rgba(23,24,23,0.08)]">
                                   <span>Interacts:</span>
                                   {flow.connections.map((c, cIdx) => (
                                     <button
                                       key={cIdx}
                                       type="button"
                                       onClick={() => handleJumpToNode(c)}
-                                      className="text-white hover:text-[#e49366] underline cursor-pointer"
+                                      className="text-[#171817] hover:text-[#df7d4c] underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#df7d4c] rounded-xs"
                                     >
                                       {c}
                                     </button>
@@ -706,10 +723,10 @@ export default function Home() {
                       {understanding.feature_map.map((feat, idx) => (
                         <div
                           key={idx}
-                          className="p-5 bg-[#141414] border border-white/10 rounded-2xl space-y-2.5"
+                          className="p-5 bg-[#fffefa] border border-[rgba(23,24,23,0.12)] rounded-2xl space-y-2.5 shadow-xs"
                         >
-                          <div className="font-extrabold text-white text-sm">{feat.name}</div>
-                          <p className="text-[#9e9e9e] text-xs leading-relaxed">{feat.description}</p>
+                          <div className="font-extrabold text-[#171817] text-sm">{feat.name}</div>
+                          <p className="text-[#6b6963] text-xs leading-relaxed">{feat.description}</p>
                           {feat.files && feat.files.length > 0 && (
                             <div className="flex flex-wrap gap-1.5 pt-2 font-code text-[11px]">
                               {feat.files.map((file, fIdx) => (
@@ -717,7 +734,7 @@ export default function Home() {
                                   key={fIdx}
                                   type="button"
                                   onClick={() => handleJumpToNode(file)}
-                                  className="px-3 py-1 bg-[#0e0e0e] text-white hover:text-[#e49366] border border-white/10 hover:border-[#e49366] rounded-xl cursor-pointer transition-all font-bold"
+                                  className="px-3 py-1 bg-[#f4efe6] text-[#171817] hover:text-[#df7d4c] border border-[rgba(23,24,23,0.1)] hover:border-[#df7d4c] rounded-xl cursor-pointer transition-all font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#df7d4c]"
                                 >
                                   {file} &rarr;
                                 </button>
@@ -750,37 +767,41 @@ export default function Home() {
           {/* TAB 4: Documentation */}
           {mainTab === "docs" && (
             <div className="akaru-card p-6 sm:p-8 space-y-5 shadow-2xl text-xs">
-              <div className="flex border-b border-white/10 gap-3">
+              <div role="tablist" aria-label="Documentation Files" className="flex border-b border-[rgba(23,24,23,0.1)] gap-3">
                 <button
                   type="button"
+                  role="tab"
+                  aria-selected={docsTab === "readme"}
                   onClick={() => setDocsTab("readme")}
-                  className={`pb-3.5 px-4 font-bold transition-all cursor-pointer border-b-2 ${
+                  className={`pb-3.5 px-4 font-bold transition-all cursor-pointer border-b-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#df7d4c] ${
                     docsTab === "readme"
-                      ? "text-[#e49366] border-[#e49366]"
-                      : "text-white/60 border-transparent hover:text-white"
+                      ? "text-[#df7d4c] border-[#df7d4c]"
+                      : "text-[#6b6963] border-transparent hover:text-[#171817]"
                   }`}
                 >
                   README {repo.has_readme ? "(Present)" : "(None)"}
                 </button>
                 <button
                   type="button"
+                  role="tab"
+                  aria-selected={docsTab === "contributing"}
                   onClick={() => setDocsTab("contributing")}
-                  className={`pb-3.5 px-4 font-bold transition-all cursor-pointer border-b-2 ${
+                  className={`pb-3.5 px-4 font-bold transition-all cursor-pointer border-b-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#df7d4c] ${
                     docsTab === "contributing"
-                      ? "text-[#e49366] border-[#e49366]"
-                      : "text-white/60 border-transparent hover:text-white"
+                      ? "text-[#df7d4c] border-[#df7d4c]"
+                      : "text-[#6b6963] border-transparent hover:text-[#171817]"
                   }`}
                 >
                   CONTRIBUTING {repo.has_contributing ? "(Present)" : "(None)"}
                 </button>
               </div>
 
-              <div className="bg-[#0e0e0e] p-6 rounded-2xl border border-white/10 max-h-96 overflow-y-auto text-white font-code text-xs whitespace-pre-wrap leading-relaxed">
+              <div className="bg-[#fffefa] p-6 rounded-2xl border border-[rgba(23,24,23,0.12)] max-h-96 overflow-y-auto text-[#171817] font-code text-xs whitespace-pre-wrap leading-relaxed shadow-xs">
                 {docsTab === "readme" ? (
-                  repo.readme_content || <span className="text-[#9e9e9e]">No README file found.</span>
+                  repo.readme_content || <span className="text-[#6b6963]">No README file found.</span>
                 ) : (
                   repo.contributing_content || (
-                    <span className="text-[#9e9e9e]">No CONTRIBUTING file found.</span>
+                    <span className="text-[#6b6963]">No CONTRIBUTING file found.</span>
                   )
                 )}
               </div>

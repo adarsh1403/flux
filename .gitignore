@@ -77,5 +77,6 @@ yarn-error.log*
 .claude/
 .gemini/
 .opencode/
+
 .impeccable/
 
