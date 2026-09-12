@@ -40,6 +40,7 @@ interface SimNode {
   x: number;
   y: number;
   radius: number;
+  animationPhase: number;
   isDragging?: boolean;
 }
 
@@ -60,6 +61,16 @@ const AKARU_CLUSTERS = [
   { color: "#e11d48", name: "Coral Rose" },
   { color: "#6b7280", name: "Neutral Slate" },
 ];
+
+const NODE_CLEARANCE = 34;
+const NODE_RADIUS_CLEARANCE_SCALE = 0.85;
+const LAYOUT_ITERATIONS = 110;
+
+const getNodeSafeDistance = (a: SimNode, b: SimNode) =>
+  a.radius +
+  b.radius +
+  NODE_CLEARANCE +
+  (a.radius + b.radius) * NODE_RADIUS_CLEARANCE_SCALE;
 
 // Renders interactive canvas dependency network with energy pulses and inspector drawer.
 export default function ObsidianGraphCanvas({
@@ -145,26 +156,31 @@ export default function ObsidianGraphCanvas({
         x: width / 2 + Math.cos(angle) * radiusDist,
         y: height / 2 + Math.sin(angle) * radiusDist,
         radius: baseRadius + bonus,
+        animationPhase: (idx * 0.73 + (n.cluster || 0) * 0.41) % (Math.PI * 2),
       };
     });
 
-    // Run quick relaxation passes (70 iterations) then FREEZE STATICALLY
+    // Relax every node pair, including disconnected nodes, against their visible radius plus a hidden buffer.
     const nodeMap = new Map<string, SimNode>();
     simNodes.forEach((n) => nodeMap.set(n.id, n));
 
-    for (let iter = 0; iter < 70; iter++) {
+    for (let iter = 0; iter < LAYOUT_ITERATIONS; iter++) {
       for (let i = 0; i < simNodes.length; i++) {
         for (let j = i + 1; j < simNodes.length; j++) {
           const a = simNodes[i];
           const b = simNodes[j];
           const dx = b.x - a.x;
           const dy = b.y - a.y;
-          const distSq = dx * dx + dy * dy || 1;
-          const dist = Math.sqrt(distSq);
-          if (dist < 125) {
-            const force = (125 - dist) * 0.08;
-            const fx = (dx / dist) * force;
-            const fy = (dy / dist) * force;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          const safeDistance = getNodeSafeDistance(a, b);
+
+          if (distance < safeDistance) {
+            const directionAngle = distance ? Math.atan2(dy, dx) : (i + j) * 0.7;
+            const normalizedDistance = distance || 1;
+            const overlap = safeDistance - normalizedDistance;
+            const share = overlap * (iter > LAYOUT_ITERATIONS - 20 ? 0.56 : 0.24);
+            const fx = (distance ? dx / normalizedDistance : Math.cos(directionAngle)) * share;
+            const fy = (distance ? dy / normalizedDistance : Math.sin(directionAngle)) * share;
             a.x -= fx;
             a.y -= fy;
             b.x += fx;
@@ -190,6 +206,34 @@ export default function ObsidianGraphCanvas({
           tgt.y -= fy;
         }
       }
+    }
+
+    // Finish with hard separation so the static layout never leaves a pair inside its invisible radius.
+    for (let pass = 0; pass < 12; pass++) {
+      let settled = true;
+      for (let i = 0; i < simNodes.length; i++) {
+        for (let j = i + 1; j < simNodes.length; j++) {
+          const a = simNodes[i];
+          const b = simNodes[j];
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const rawDistance = Math.sqrt(dx * dx + dy * dy);
+          const distance = rawDistance || 1;
+          const safeDistance = getNodeSafeDistance(a, b);
+          if (distance >= safeDistance) continue;
+
+          settled = false;
+          const directionAngle = rawDistance ? Math.atan2(dy, dx) : (i + j) * 0.7;
+          const correction = (safeDistance - distance) / distance * 0.52;
+          const fx = (rawDistance ? dx : Math.cos(directionAngle)) * correction;
+          const fy = (rawDistance ? dy : Math.sin(directionAngle)) * correction;
+          a.x -= fx;
+          a.y -= fy;
+          b.x += fx;
+          b.y += fy;
+        }
+      }
+      if (settled) break;
     }
 
     const simEdges: SimEdge[] = graph.edges.map((e, idx) => ({
@@ -433,13 +477,25 @@ export default function ObsidianGraphCanvas({
         const isFocused = activeTarget && activeTarget.id === node.id;
         const isHovered = hoveredNode && hoveredNode.id === node.id;
         const nodeColor = getNodeColor(node);
+        const breathe = 1 + Math.sin(tTime * 0.9 + node.animationPhase) * (isFocused ? 0.045 : 0.022);
+        const visualRadius = node.radius * breathe;
 
         ctx.save();
+
+        // Small ambient ring keeps the network alive without changing its geometry or interaction targets.
+        if (!isFocused && !isHovered) {
+          const ambientPhase = (tTime * 0.42 + node.animationPhase) % (Math.PI * 2);
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, visualRadius + 3 + Math.sin(ambientPhase) * 1.5, 0, 2 * Math.PI);
+          ctx.strokeStyle = `rgba(223, 125, 76, ${0.08 + (Math.sin(ambientPhase) + 1) * 0.025})`;
+          ctx.lineWidth = 0.8 / zoom;
+          ctx.stroke();
+        }
 
         // Animated radar beacon around hub nodes or focused node
         if (node.in_degree >= 2 || isFocused) {
           const ripplePhase = (tTime * 0.7 + (node.cluster || 0)) % 1;
-          const rippleRadius = node.radius + ripplePhase * (isFocused ? 20 : 13);
+          const rippleRadius = visualRadius + ripplePhase * (isFocused ? 20 : 13);
           const rippleOpacity = (1 - ripplePhase) * (isFocused ? 0.75 : 0.35);
 
           ctx.beginPath();
@@ -453,7 +509,7 @@ export default function ObsidianGraphCanvas({
 
         // Outer aura glow on focused or hovered node
         if (isFocused || isHovered) {
-          const auraRadius = node.radius + (isFocused ? 8 : 6) / zoom;
+          const auraRadius = visualRadius + (isFocused ? 8 : 6) / zoom;
           ctx.beginPath();
           ctx.arc(node.x, node.y, auraRadius, 0, 2 * Math.PI);
           ctx.fillStyle = isFocused ? "rgba(223, 125, 76, 0.22)" : "rgba(223, 125, 76, 0.14)";
@@ -462,25 +518,25 @@ export default function ObsidianGraphCanvas({
 
         // Elevation drop shadow beneath the circle
         ctx.beginPath();
-        ctx.arc(node.x, node.y + 1.8 / zoom, node.radius, 0, 2 * Math.PI);
+        ctx.arc(node.x, node.y + 1.8 / zoom, visualRadius, 0, 2 * Math.PI);
         ctx.fillStyle = isConnected ? "rgba(23, 24, 23, 0.12)" : "rgba(23, 24, 23, 0.04)";
         ctx.fill();
 
         // Solid porcelain base to occlude any background connection wires
         ctx.beginPath();
-        ctx.arc(node.x, node.y, node.radius, 0, 2 * Math.PI);
+        ctx.arc(node.x, node.y, visualRadius, 0, 2 * Math.PI);
         ctx.fillStyle = "#fffefa";
         ctx.fill();
 
         // Primary solid cluster-colored circle body
         ctx.beginPath();
-        ctx.arc(node.x, node.y, node.radius, 0, 2 * Math.PI);
+        ctx.arc(node.x, node.y, visualRadius, 0, 2 * Math.PI);
         ctx.fillStyle = isConnected ? nodeColor : "rgba(107, 114, 128, 0.22)";
         ctx.fill();
 
         // Crisp perimeter border
         ctx.beginPath();
-        ctx.arc(node.x, node.y, node.radius, 0, 2 * Math.PI);
+        ctx.arc(node.x, node.y, visualRadius, 0, 2 * Math.PI);
         if (isFocused) {
           ctx.strokeStyle = "#171817";
           ctx.lineWidth = 2.4 / zoom;
@@ -499,7 +555,7 @@ export default function ObsidianGraphCanvas({
         // Additional accent reticle ring for focused node
         if (isFocused) {
           ctx.beginPath();
-          ctx.arc(node.x, node.y, node.radius + 3.5 / zoom, 0, 2 * Math.PI);
+          ctx.arc(node.x, node.y, visualRadius + 3.5 / zoom, 0, 2 * Math.PI);
           ctx.strokeStyle = "#df7d4c";
           ctx.lineWidth = 1.4 / zoom;
           ctx.stroke();
@@ -518,7 +574,7 @@ export default function ObsidianGraphCanvas({
           const textWidth = textMetrics.width;
           const pillPaddingX = Math.max(5.5 / zoom, 4.5);
           const pillHeight = Math.max(fontSize + 6 / zoom, 15 / zoom);
-          const pillY = node.y + node.radius + 5 / zoom;
+          const pillY = node.y + visualRadius + 5 / zoom;
           const pillWidth = textWidth + pillPaddingX * 2;
           const pillX = node.x - pillWidth / 2;
           const pillRadius = 4 / zoom;
